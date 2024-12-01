@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hard select</title>
+    <style>
+        /* Style de base */
+        body {
+            font-family: Arial, Sans-Serif;
+            background-color: #f0f0f0;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Hard select, l'inovation de l'informatique</h1>
+    </header>
+    
+    <section>
+        <h2>Laissez-nous un message</h2>
+        <form id="messageForm">
+            <label for="nom">Votre nom :</label><br>
+            <input type="text" id="nom" name="nom" placeholder="Entrez votre nom" required><br><br>
+            <label for="email">Votre email :</label><br>
+            <input type="email" id="email" name="email" placeholder="Entrez votre email" required><br><br>
+            <label for="message">Votre message :</label><br>
+            <textarea id="message" name="message" rows="5" cols="40" placeholder="Tapez votre message ici..." required></textarea><br><br>
+            <button type="submit">Envoyer</button>
+        </form>
+    </section>
+    
+    <section>
+        <h2>Messages reçus</h2>
+        <div id="messageContainer"></div>
+    </section>
+
+    <script>
+        // Récupère les messages existants dans localStorage et les affiche
+        window.onload = function() {
+            const messageContainer = document.getElementById('messageContainer');
+            const storedMessages = JSON.parse(localStorage.getItem('messages')) || [];
+            storedMessages.forEach(message => {
+                const messageElement = document.createElement('p');
+                messageElement.textContent = `${message.nom} (${message.email}): ${message.message}`;
+                messageContainer.appendChild(messageElement);
+            });
+        };
+
+        // Gère la soumission du formulaire
+        document.getElementById('messageForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const nom = document.getElementById('nom').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            // Crée un objet message
+            const newMessage = { nom, email, message };
+
+            // Récupère les messages existants et ajoute le nouveau
+            const storedMessages = JSON.parse(localStorage.getItem('messages')) || [];
+            storedMessages.push(newMessage);
+
+            // Enregistre les messages dans localStorage
+            localStorage.setItem('messages', JSON.stringify(storedMessages));
+
+            // Réinitialise le formulaire
+            document.getElementById('messageForm').reset();
+
+            // Affiche le message ajouté
+            const messageContainer = document.getElementById('messageContainer');
+            const messageElement = document.createElement('p');
+            messageElement.textContent = `${newMessage.nom} (${newMessage.email}): ${newMessage.message}`;
+            messageContainer.appendChild(messageElement);
+        });
+    </script>
+</body>
+</html>
