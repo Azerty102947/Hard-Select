@@ -53,44 +53,62 @@
         <div id="messageContainer"></div>
     </section>
 
+    <!-- Ajout des scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+
     <script>
-        // Récupère les messages existants dans localStorage et les affiche
-        window.onload = function() {
-            const messageContainer = document.getElementById('messageContainer');
-            const storedMessages = JSON.parse(localStorage.getItem('messages')) || [];
-            storedMessages.forEach(message => {
-                const messageElement = document.createElement('p');
-                messageElement.textContent = `${message.nom} (${message.email}): ${message.message}`;
-                messageContainer.appendChild(messageElement);
-            });
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEpFwl6uj3VLD-U9xfHTIzwBSlQWQ79cU",
+            authDomain: "hard-select.firebaseapp.com",
+            projectId: "hard-select",
+            storageBucket: "hard-select.appspot.com",
+            messagingSenderId: "890751844437",
+            appId: "1:890751844437:web:c18181f487218d5cfa54dc",
+            measurementId: "G-26LCQVR3EK"
         };
 
-        // Gère la soumission du formulaire
-        document.getElementById('messageForm').addEventListener('submit', function(event) {
+        // Initialisation de Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Gestion du formulaire de soumission
+        document.getElementById('messageForm').addEventListener('submit', async function(event) {
             event.preventDefault();
-            
+
             const nom = document.getElementById('nom').value;
             const email = document.getElementById('email').value;
             const message = document.getElementById('message').value;
 
-            // Crée un objet message
-            const newMessage = { nom, email, message };
+            try {
+                // Ajout du message à Firestore
+                await db.collection('messages').add({
+                    nom: nom,
+                    email: email,
+                    message: message,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
-            // Récupère les messages existants et ajoute le nouveau
-            const storedMessages = JSON.parse(localStorage.getItem('messages')) || [];
-            storedMessages.push(newMessage);
+                alert('Message envoyé avec succès !');
+                document.getElementById('messageForm').reset();
+            } catch (error) {
+                console.error('Erreur lors de l\'envoi du message :', error);
+                alert('Une erreur s\'est produite.');
+            }
+        });
 
-            // Enregistre les messages dans localStorage
-            localStorage.setItem('messages', JSON.stringify(storedMessages));
-
-            // Réinitialise le formulaire
-            document.getElementById('messageForm').reset();
-
-            // Affiche le message ajouté
+        // Récupération et affichage des messages
+        db.collection('messages').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
             const messageContainer = document.getElementById('messageContainer');
-            const messageElement = document.createElement('p');
-            messageElement.textContent = `${newMessage.nom} (${newMessage.email}): ${newMessage.message}`;
-            messageContainer.appendChild(messageElement);
+            messageContainer.innerHTML = ''; // Réinitialise la liste des messages
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const messageElement = document.createElement('p');
+                messageElement.textContent = `${data.nom} (${data.email}) : ${data.message}`;
+                messageContainer.appendChild(messageElement);
+            });
         });
     </script>
 </body>
